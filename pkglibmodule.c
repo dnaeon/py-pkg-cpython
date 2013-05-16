@@ -34,14 +34,20 @@ static PyObject *pkglib_db_open(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_close(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_list(PyObject *self, PyObject *args);
+static PyObject *pkglib_pkg_get_name(PyObject *self, PyObject *args);
+static PyObject *pkglib_pkg_get_version(PyObject *self, PyObject *args);
+static PyObject *pkglib_pkg_get_comment(PyObject *self, PyObject *args);
 
 static PyMethodDef
 PkgLibMethods[] = {
-	{ "db_open",   pkglib_db_open,  METH_VARARGS, NULL },
-	{ "db_close",  pkglib_db_close, METH_VARARGS, NULL },
-	{ "db_query",  pkglib_db_query, METH_VARARGS, NULL },
-	{ "db_list",   pkglib_db_list,  METH_VARARGS, NULL },
-	{ NULL,        NULL,            0,            NULL }, /* Sentinel */
+	{ "db_open",           pkglib_db_open,           METH_VARARGS, NULL },
+	{ "db_close",          pkglib_db_close,          METH_VARARGS, NULL },
+	{ "db_query",          pkglib_db_query,          METH_VARARGS, NULL },
+	{ "db_list",           pkglib_db_list,           METH_VARARGS, NULL },
+	{ "pkg_get_name",      pkglib_pkg_get_name,      METH_VARARGS, NULL },
+	{ "pkg_get_version",   pkglib_pkg_get_version,   METH_VARARGS, NULL },
+	{ "pkg_get_comment",   pkglib_pkg_get_comment,   METH_VARARGS, NULL },
+	{ NULL,                NULL,                     0,            NULL }, /* Sentinel */
 };
 
 static PyObject *
@@ -126,12 +132,70 @@ pkglib_db_list(PyObject *self, PyObject *args)
 
 	it = (struct pkgdb_it *)PyCapsule_GetPointer(it_capsule, "pkglib.it");
 	
-	if (pkgdb_it_next(it, &pkg, PKG_LOAD_BASIC) == EPKG_OK) {
-		pkg_get(pkg, PKG_NAME, &name, PKG_VERSION, &version, PKG_COMMENT, &comment);
-		result = (PyObject *)Py_BuildValue("sss", name, version, comment);
-	} else {
+	if (pkgdb_it_next(it, &pkg, PKG_LOAD_BASIC) == EPKG_OK)
+		result = PyCapsule_New(pkg, "pkglib.pkg", NULL);
+	else
 		result = Py_None;
-	}
+
+	return (result);
+}
+
+static PyObject *
+pkglib_pkg_get_name(PyObject *self, PyObject *args)
+{
+	struct pkg *pkg = NULL;
+	const char *name = NULL;
+	PyObject *result = NULL;
+	PyObject *pkg_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &pkg_capsule) == 0)
+		return (NULL);
+
+	pkg = (struct pkg *)PyCapsule_GetPointer(pkg_capsule, "pkglib.pkg");
+
+	pkg_get(pkg, PKG_NAME, &name);
+
+	result = (PyObject *)Py_BuildValue("s", name);
+
+	return (result);
+}
+
+static PyObject *
+pkglib_pkg_get_version(PyObject *self, PyObject *args)
+{
+	struct pkg *pkg = NULL;
+	const char *version = NULL;
+	PyObject *result = NULL;
+	PyObject *pkg_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &pkg_capsule) == 0)
+		return (NULL);
+
+	pkg = (struct pkg *)PyCapsule_GetPointer(pkg_capsule, "pkglib.pkg");
+
+	pkg_get(pkg, PKG_VERSION, &version);
+
+	result = (PyObject *)Py_BuildValue("s", version);
+
+	return (result);
+}
+
+static PyObject *
+pkglib_pkg_get_comment(PyObject *self, PyObject *args)
+{
+	struct pkg *pkg = NULL;
+	const char *comment = NULL;
+	PyObject *result = NULL;
+	PyObject *pkg_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &pkg_capsule) == 0)
+		return (NULL);
+
+	pkg = (struct pkg *)PyCapsule_GetPointer(pkg_capsule, "pkglib.pkg");
+
+	pkg_get(pkg, PKG_COMMENT, &comment);
+
+	result = (PyObject *)Py_BuildValue("s", comment);
 
 	return (result);
 }
