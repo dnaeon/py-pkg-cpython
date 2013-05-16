@@ -6,6 +6,9 @@ class PkgDb(object):
 	def __init__(self, remotedb=False):
                 self.__db = pkglib.db_open(remotedb)
 
+        def close(self):
+                pkglib.db_close(self.__db)
+
         def query(self, pkgname):
                 return PkgIt(self.__db, pkgname)
 
