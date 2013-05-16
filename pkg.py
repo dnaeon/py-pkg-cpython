@@ -44,5 +44,6 @@ class Pkg(object):
         def origin(self):
                 return pkglib.pkg_get_origin(self._pkg)
 
-
+        def desc(self):
+                return pkglib.pkg_get_desc(self._pkg)
 
