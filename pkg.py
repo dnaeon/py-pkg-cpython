@@ -41,4 +41,8 @@ class Pkg(object):
         def comment(self):
                 return pkglib.pkg_get_comment(self._pkg)
 
+        def origin(self):
+                return pkglib.pkg_get_origin(self._pkg)
+
+
 

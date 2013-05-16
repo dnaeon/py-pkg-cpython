@@ -39,6 +39,7 @@ static PyObject *pkglib_db_query_iter(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_name(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_version(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_comment(PyObject *self, PyObject *args);
+static PyObject *pkglib_pkg_get_origin(PyObject *self, PyObject *args);
 
 static PyMethodDef
 PkgLibMethods[] = {
@@ -49,6 +50,7 @@ PkgLibMethods[] = {
 	{ "pkg_get_name",      pkglib_pkg_get_name,      METH_VARARGS, NULL },
 	{ "pkg_get_version",   pkglib_pkg_get_version,   METH_VARARGS, NULL },
 	{ "pkg_get_comment",   pkglib_pkg_get_comment,   METH_VARARGS, NULL },
+	{ "pkg_get_origin",    pkglib_pkg_get_origin,    METH_VARARGS, NULL },
 	{ NULL,                NULL,                     0,            NULL }, /* Sentinel */
 };
 
@@ -207,6 +209,26 @@ pkglib_pkg_get_comment(PyObject *self, PyObject *args)
 	pkg_get(pkg, PKG_COMMENT, &comment);
 
 	result = (PyObject *)Py_BuildValue("s", comment);
+
+	return (result);
+}
+
+static PyObject *
+pkglib_pkg_get_origin(PyObject *self, PyObject *args)
+{
+	struct pkg *pkg = NULL;
+	const char *origin = NULL;
+	PyObject *result = NULL;
+	PyObject *pkg_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &pkg_capsule) == 0)
+		return (NULL);
+
+	pkg = (struct pkg *)PyCapsule_GetPointer(pkg_capsule, "pkglib.pkg");
+
+	pkg_get(pkg, PKG_ORIGIN, &origin);
+
+	result = (PyObject *)Py_BuildValue("s", origin);
 
 	return (result);
 }
