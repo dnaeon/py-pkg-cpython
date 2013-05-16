@@ -24,6 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdbool.h>
+
 #include <pkg.h>
 
 #include <Python.h>
@@ -99,14 +101,23 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 	PyObject *db_capsule = NULL;
 	PyObject *result = NULL;
 	const char *pkgname = NULL;
+	match_t match = MATCH_EXACT;
+	bool match_regex = false;
 
-	if (PyArg_ParseTuple(args, "Os", &db_capsule, &pkgname) == 0) {
+	/*
+	 * TODO: Allow for passing multiple package names as a list
+	 */
+	
+	if (PyArg_ParseTuple(args, "Osi", &db_capsule, &pkgname, &match_regex) == 0) {
 		return (NULL);
 	}
 
+	if (match_regex)
+		match = MATCH_REGEX;
+
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
-	if ((it = pkgdb_query(db, pkgname, MATCH_GLOB)) == NULL) {
+	if ((it = pkgdb_query(db, pkgname, match)) == NULL) {
 		return (NULL);
 	}
 

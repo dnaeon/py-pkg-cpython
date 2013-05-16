@@ -7,12 +7,12 @@ class PkgDb(object):
         def close(self):
                 pkglib.db_close(self._db)
 
-        def query(self, pkgname):
-                return PkgIter(self._db, pkgname)
+        def query(self, pkgname, match_regex=False):
+                return PkgIter(self._db, pkgname, match_regex)
 
 class PkgIter(object):
-        def __init__(self, db, pkgname):
-                self._it = pkglib.db_query_info(db, pkgname)
+        def __init__(self, db, pkgname, match_regex=False):
+                self._it = pkglib.db_query_info(db, pkgname, match_regex)
 
         def __iter__(self):
                 return self
