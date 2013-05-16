@@ -8,17 +8,17 @@ class PkgDb(object):
                 pkglib.db_close(self._db)
 
         def query(self, pkgname):
-                return PkgIt(self._db, pkgname)
+                return PkgIter(self._db, pkgname)
 
-class PkgIt(PkgDb):
+class PkgIter(object):
         def __init__(self, db, pkgname):
-                self._it = pkglib.db_query(db, pkgname)
+                self._it = pkglib.db_query_info(db, pkgname)
 
         def __iter__(self):
                 return self
 
         def next(self):
-                result = pkglib.db_list(self._it)
+                result = pkglib.db_query_iter(self._it)
 
                 if not result:
                         raise StopIteration

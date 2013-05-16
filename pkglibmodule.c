@@ -32,8 +32,8 @@ void initpkglib(void);
 
 static PyObject *pkglib_db_open(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_close(PyObject *self, PyObject *args);
-static PyObject *pkglib_db_query(PyObject *self, PyObject *args);
-static PyObject *pkglib_db_list(PyObject *self, PyObject *args);
+static PyObject *pkglib_db_query_info(PyObject *self, PyObject *args);
+static PyObject *pkglib_db_query_iter(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_name(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_version(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_comment(PyObject *self, PyObject *args);
@@ -42,8 +42,8 @@ static PyMethodDef
 PkgLibMethods[] = {
 	{ "db_open",           pkglib_db_open,           METH_VARARGS, NULL },
 	{ "db_close",          pkglib_db_close,          METH_VARARGS, NULL },
-	{ "db_query",          pkglib_db_query,          METH_VARARGS, NULL },
-	{ "db_list",           pkglib_db_list,           METH_VARARGS, NULL },
+	{ "db_query_info",     pkglib_db_query_info,     METH_VARARGS, NULL },
+	{ "db_query_iter",     pkglib_db_query_iter,     METH_VARARGS, NULL },
 	{ "pkg_get_name",      pkglib_pkg_get_name,      METH_VARARGS, NULL },
 	{ "pkg_get_version",   pkglib_pkg_get_version,   METH_VARARGS, NULL },
 	{ "pkg_get_comment",   pkglib_pkg_get_comment,   METH_VARARGS, NULL },
@@ -92,7 +92,7 @@ pkglib_db_close(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pkglib_db_query(PyObject *self, PyObject *args)
+pkglib_db_query_info(PyObject *self, PyObject *args)
 {
 	struct pkgdb *db = NULL;
 	struct pkgdb_it *it = NULL;
@@ -116,7 +116,7 @@ pkglib_db_query(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pkglib_db_list(PyObject *self, PyObject *args)
+pkglib_db_query_iter(PyObject *self, PyObject *args)
 {
 	static struct pkg *pkg = NULL;
 	struct pkgdb_it *it = NULL;
