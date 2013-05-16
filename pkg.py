@@ -4,6 +4,9 @@ class PkgDb(object):
 	def __init__(self, remotedb=False):
                 self._db = pkglib.db_open(remotedb)
 
+        def __del__(self):
+                pass
+
         def close(self):
                 pkglib.db_close(self._db)
 
@@ -13,6 +16,9 @@ class PkgDb(object):
 class PkgIter(object):
         def __init__(self, db, pkgname, match_regex=False):
                 self._it = pkglib.db_query_info(db, pkgname, match_regex)
+
+        def __del__(self):
+                pass
 
         def __iter__(self):
                 return self
@@ -28,6 +34,9 @@ class PkgIter(object):
 class Pkg(object):
         def __init__(self, pkg):
                 self._pkg = pkg
+
+        def __del__(self):
+                pass
 
         def __str__(self):
                 return '%s-%s: %s' % (self.name(), self.version(), self.comment())
