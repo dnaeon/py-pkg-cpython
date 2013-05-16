@@ -120,9 +120,9 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 {
 	static struct pkg *pkg = NULL;
 	struct pkgdb_it *it = NULL;
-	const char *name,
-		   *version,
-		   *comment;
+	const char *name = NULL,
+		   *version = NULL,
+		   *comment = NULL;
 	PyObject *it_capsule = NULL;
 	PyObject *result = NULL;
 
