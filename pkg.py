@@ -47,3 +47,6 @@ class Pkg(object):
         def desc(self):
                 return pkglib.pkg_get_desc(self._pkg)
 
+        def mesg(self):
+                return pkglib.pkg_get_mesg(self._pkg)
+
