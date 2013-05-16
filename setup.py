@@ -14,7 +14,8 @@ setup(name='pkglib',
               include_dirs=['/usr/local/include'],
               library_dirs=['/usr/local/lib'],
               libraries=['pkg'],
-              sources=['pkglibmodule.c']
+              sources=['pkglibmodule.c'],
+              extra_link_args=['-Wall', '-g'],
           )
       ]
 )
