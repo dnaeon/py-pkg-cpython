@@ -151,8 +151,10 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 	
 	if (pkgdb_it_next(it, &pkg, PKG_LOAD_BASIC) == EPKG_OK)
 		result = PyCapsule_New(pkg, "pkglib.pkg", NULL);
-	else
+	else {
+		pkgdb_it_reset(it);
 		result = Py_None;
+	}
 
 	return (result);
 }
