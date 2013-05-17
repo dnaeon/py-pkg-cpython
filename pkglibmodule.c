@@ -135,7 +135,7 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 static PyObject *
 pkglib_db_query_iter(PyObject *self, PyObject *args)
 {
-	static struct pkg *pkg = NULL;
+	struct pkg *pkg = NULL;
 	struct pkgdb_it *it = NULL;
 	const char *name = NULL,
 		   *version = NULL,
