@@ -41,6 +41,9 @@ class Pkg(object):
         def __str__(self):
                 return '%s-%s: %s' % (self.name(), self.version(), self.comment())
 
+        def __repr__(self):
+                return self.origin()
+
         def name(self):
                 return pkglib.pkg_get_name(self._pkg)
 
