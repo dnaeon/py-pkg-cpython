@@ -126,12 +126,15 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 	 * TODO: Allow for passing multiple package names as a list
 	 */
 	
-	if (PyArg_ParseTuple(args, "Osi", &db_capsule, &pkgname, &match_regex) == 0) {
+	if (PyArg_ParseTuple(args, "Ozi", &db_capsule, &pkgname, &match_regex) == 0) {
 		return (NULL);
 	}
 
 	if (match_regex)
 		match = MATCH_REGEX;
+
+	if (pkgname == NULL)
+		match = MATCH_ALL;
 
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
