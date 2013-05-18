@@ -36,6 +36,8 @@ static PyObject *pkglib_db_open(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_close(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_info(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_iter(PyObject *self, PyObject *args);
+static PyObject *pkglib_db_query_install(PyObject *self, PyObject *args);
+static PyObject *pkglib_db_query_install_iter(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_name(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_version(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_comment(PyObject *self, PyObject *args);
@@ -58,6 +60,8 @@ PkgLibMethods[] = {
 	{ "db_close",          pkglib_db_close,          METH_VARARGS, NULL },
 	{ "db_query_info",     pkglib_db_query_info,     METH_VARARGS, NULL },
 	{ "db_query_iter",     pkglib_db_query_iter,     METH_VARARGS, NULL },
+	{ "db_query_install",  pkglib_db_query_install,  METH_VARARGS, NULL },
+	{ "db_query_install_iter", pkglib_db_query_install_iter, METH_VARARGS, NULL },
 	{ "pkg_get_name",      pkglib_pkg_get_name,      METH_VARARGS, NULL },
 	{ "pkg_get_version",   pkglib_pkg_get_version,   METH_VARARGS, NULL },
 	{ "pkg_get_comment",   pkglib_pkg_get_comment,   METH_VARARGS, NULL },
@@ -128,10 +132,6 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 	match_t match = MATCH_EXACT;
 	bool match_regex = false;
 
-	/*
-	 * TODO: Allow for passing multiple package names as a list
-	 */
-	
 	if (PyArg_ParseTuple(args, "Ozi", &db_capsule, &pkgname, &match_regex) == 0) {
 		return (NULL);
 	}
@@ -149,6 +149,58 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 	}
 
 	result = PyCapsule_New(it, "pkglib.it", NULL);
+
+	return (result);
+}
+
+static PyObject *
+pkglib_db_query_install(PyObject *self, PyObject *args)
+{
+	struct pkgdb *db = NULL;
+	struct pkg_jobs *jobs = NULL;
+	PyObject *db_capsule = NULL,
+		 *result = NULL;
+	char *pkgname = NULL;
+	char **pkgs;
+	match_t match = MATCH_EXACT;
+	bool match_regex = false;
+	pkg_flags f = PKG_FLAG_NONE | PKG_FLAG_PKG_VERSION_TEST;
+	
+	/*
+	 * TODO: Allow for passing multiple package names as a list
+	 */
+	
+	if (PyArg_ParseTuple(args, "Osi", &db_capsule, &pkgname, &match_regex) == 0) 
+		return (NULL);
+
+	if (match_regex)
+		match = MATCH_REGEX;
+
+	/*
+	 * TODO: Check for permissions before attempting to install packages
+	 */
+	
+	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
+
+	pkgs = calloc(1, sizeof(char *));
+	pkgs[0] = pkgname;
+
+	if (pkg_jobs_new(&jobs, PKG_JOBS_INSTALL, db) != EPKG_OK)
+		return (NULL);
+
+	pkg_jobs_set_flags(jobs, f);
+
+	/*
+	 * TODO: Exceptions handling
+	 */
+
+	if (pkg_jobs_add(jobs, match, pkgs, 1) == EPKG_FATAL)
+		return (NULL);
+
+	if (pkg_jobs_solve(jobs) != EPKG_OK)
+		return (NULL);
+
+	result = PyCapsule_New(jobs, "pkglib.jobs", NULL);
 
 	return (result);
 }
@@ -180,6 +232,30 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 	return (result);
 }
 
+static PyObject *
+pkglib_db_query_install_iter(PyObject *self, PyObject *args)
+{
+	static struct pkg *pkg = NULL;
+	struct pkg_jobs *jobs = NULL;
+	PyObject *result = NULL;
+	PyObject *jobs_capsule = NULL;
+
+	/*
+	 * TODO: Error and exceptions handling
+	 */
+	
+	if (PyArg_ParseTuple(args, "O", &jobs_capsule) == 0)
+		return (NULL);
+
+	jobs = (struct pkg_jobs *)PyCapsule_GetPointer(jobs_capsule, "pkglib.jobs");
+
+	if (pkg_jobs(jobs, &pkg) == EPKG_OK)
+		result = PyCapsule_New(pkg, "pkglib.pkg", NULL);
+	else
+		result = Py_None;
+
+	return (result);
+}
 static PyObject *
 pkglib_pkg_get_name(PyObject *self, PyObject *args)
 {

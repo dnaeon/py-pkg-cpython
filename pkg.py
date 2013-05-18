@@ -13,6 +13,9 @@ class PkgDb(object):
         def query(self, pkgname=None, match_regex=False):
                 return PkgIter(self._db, pkgname, match_regex)
 
+        def query_install(self, pkgname, match_regex=False):
+                return PkgJobs(self._db, pkgname, match_regex)
+
 class PkgIter(object):
         def __init__(self, db, pkgname, match_regex=False):
                 self._it = pkglib.db_query_info(db, pkgname, match_regex)
@@ -38,6 +41,24 @@ class PkgIter(object):
                 else:
                         return Pkg(result)
 
+class PkgJobs(object):
+        def __init__(self, db, pkgname, match_regex):
+                self._jobs = pkglib.db_query_install(db, pkgname, match_regex)
+
+        def __del__(self):
+                pass
+
+        def __iter__(self):
+                return self
+
+        def next(self):
+                result = pkglib.db_query_install_iter(self._jobs)
+
+                if not result:
+                        raise StopIteration
+
+                return Pkg(result)
+                        
 class Pkg(object):
         def __init__(self, pkg):
                 self._pkg = pkg
