@@ -69,3 +69,5 @@ class Pkg(object):
         def mesg(self):
                 return pkglib.pkg_get_mesg(self._pkg)
 
+        def arch(self):
+                return pkglib.pkg_get_arch(self._pkg)
