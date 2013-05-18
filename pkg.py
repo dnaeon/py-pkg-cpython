@@ -87,3 +87,7 @@ class Pkg(object):
         def repopath(self):
                 return pkglib.pkg_get_repopath(self._pkg)
 
+        def cksum(self):
+                return pkglib.pkg_get_cksum(self._pkg)
+
+
