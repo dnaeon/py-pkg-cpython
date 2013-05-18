@@ -80,3 +80,7 @@ class Pkg(object):
 
         def prefix(self):
                 return pkglib.pkg_get_prefix(self._pkg)
+
+        def infos(self):
+                return pkglib.pkg_get_infos(self._pkg)
+
