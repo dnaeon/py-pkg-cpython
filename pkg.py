@@ -90,4 +90,7 @@ class Pkg(object):
         def cksum(self):
                 return pkglib.pkg_get_cksum(self._pkg)
 
+        def reponame(self):
+                return pkglib.pkg_get_reponame(self._pkg)
+
 
