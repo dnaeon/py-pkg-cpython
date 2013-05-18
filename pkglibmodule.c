@@ -47,6 +47,7 @@ static PyObject *pkglib_pkg_get_maint(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_www(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_prefix(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_infos(PyObject *self, PyObject *args);
+static PyObject *pkglib_pkg_get_repopath(PyObject *self, PyObject *args);
 
 static PyMethodDef
 PkgLibMethods[] = {
@@ -65,6 +66,7 @@ PkgLibMethods[] = {
 	{ "pkg_get_www",       pkglib_pkg_get_www,       METH_VARARGS, NULL },
 	{ "pkg_get_prefix",    pkglib_pkg_get_prefix,    METH_VARARGS, NULL },
 	{ "pkg_get_infos",     pkglib_pkg_get_infos,     METH_VARARGS, NULL },
+	{ "pkg_get_repopath",  pkglib_pkg_get_repopath,  METH_VARARGS, NULL },
 	{ NULL,                NULL,                     0,            NULL }, /* Sentinel */
 };
 
@@ -385,6 +387,26 @@ pkglib_pkg_get_infos(PyObject *self, PyObject *args)
 	pkg_get(pkg, PKG_INFOS, &infos);
 
 	result = (PyObject *)Py_BuildValue("s", infos);
+
+	return (result);
+}
+
+static PyObject *
+pkglib_pkg_get_repopath(PyObject *self, PyObject *args)
+{
+	struct pkg *pkg = NULL;
+	const char *repopath = NULL;
+	PyObject *result = NULL;
+	PyObject *pkg_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &pkg_capsule) == 0)
+		return (NULL);
+
+	pkg = (struct pkg *)PyCapsule_GetPointer(pkg_capsule, "pkglib.pkg");
+
+	pkg_get(pkg, PKG_REPOPATH, &repopath);
+
+	result = (PyObject *)Py_BuildValue("s", repopath);
 
 	return (result);
 }

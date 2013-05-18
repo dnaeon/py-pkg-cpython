@@ -84,3 +84,6 @@ class Pkg(object):
         def infos(self):
                 return pkglib.pkg_get_infos(self._pkg)
 
+        def repopath(self):
+                return pkglib.pkg_get_repopath(self._pkg)
+
