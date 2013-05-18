@@ -78,3 +78,5 @@ class Pkg(object):
         def www(self):
                 return pkglib.pkg_get_www(self._pkg)
 
+        def prefix(self):
+                return pkglib.pkg_get_prefix(self._pkg)
