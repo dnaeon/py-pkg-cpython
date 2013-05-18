@@ -93,4 +93,6 @@ class Pkg(object):
         def reponame(self):
                 return pkglib.pkg_get_reponame(self._pkg)
 
+        def repourl(self):
+                return pkglib.pkg_get_repourl(self._pkg)
 
