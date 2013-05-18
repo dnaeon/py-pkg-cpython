@@ -75,3 +75,6 @@ class Pkg(object):
         def maint(self):
                 return pkglib.pkg_get_maint(self._pkg)
 
+        def www(self):
+                return pkglib.pkg_get_www(self._pkg)
+
