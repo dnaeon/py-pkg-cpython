@@ -20,6 +20,13 @@ class PkgIter(object):
         def __del__(self):
                 pass
 
+        def __contains__(self, name):
+                for p in self:
+                        if p.name() == name or p.origin() == name:
+                                return True
+
+                return False
+
         def __iter__(self):
                 return self
 
