@@ -71,3 +71,7 @@ class Pkg(object):
 
         def arch(self):
                 return pkglib.pkg_get_arch(self._pkg)
+
+        def maint(self):
+                return pkglib.pkg_get_maint(self._pkg)
+
