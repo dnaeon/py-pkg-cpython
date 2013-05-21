@@ -160,24 +160,42 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 	struct pkgdb *db = NULL;
 	struct pkg_jobs *jobs = NULL;
 	PyObject *db_capsule = NULL,
-		 *result = NULL;
-	char *pkgname = NULL;
+		*result = NULL,
+		*pkglist = NULL;
 	char **pkgs;
-	int retcode;
+	int pkgnum, retcode, i;
 	match_t match = MATCH_EXACT;
 	bool match_regex = false;
 	pkg_flags f = PKG_FLAG_NONE | PKG_FLAG_PKG_VERSION_TEST;
 	
-	/*
-	 * TODO: Allow for passing multiple package names as a list
-	 */
-	
-	if (PyArg_ParseTuple(args, "Osi", &db_capsule, &pkgname, &match_regex) == 0) 
+	if (PyArg_ParseTuple(args, "OOi", &db_capsule, &pkglist, &match_regex) == 0) 
 		return (NULL);
 
 	if (match_regex)
 		match = MATCH_REGEX;
 
+	/* Parse multiple packages passed as a list */
+	if (PyList_Check(pkglist)) {
+		pkgnum = PyList_Size(pkglist);
+		
+		if ((pkgs = calloc(pkgnum, sizeof(char *))) == NULL) {
+			PyErr_SetString(PyExc_MemoryError, NULL);
+			return (NULL);
+		}
+
+		for (i = 0; i < pkgnum; i++)
+			pkgs[i] = PyString_AsString(PyList_GetItem(pkglist, i));
+
+	} else if (PyString_Check(pkglist)) {
+		/* Only a single package name provided as a string */
+		pkgnum = 1;
+		pkgs = calloc(pkgnum, sizeof(char *));
+		pkgs[0] = PyString_AsString(pkglist);
+	} else {
+		PyErr_SetString(PyExc_TypeError, "Package name(s) should be a list or a string");
+		return (NULL);
+	}
+	
 	retcode = pkgdb_access(PKGDB_MODE_READ  |
 			       PKGDB_MODE_WRITE |
 			       PKGDB_MODE_CREATE,
@@ -191,9 +209,6 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
-	pkgs = calloc(1, sizeof(char *));
-	pkgs[0] = pkgname;
-
 	if (pkg_jobs_new(&jobs, PKG_JOBS_INSTALL, db) != EPKG_OK) {
 		PyErr_SetString(PyExc_MemoryError, "Cannot create jobs object");
 		return (NULL);
@@ -201,7 +216,7 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 
 	pkg_jobs_set_flags(jobs, f);
 
-	if (pkg_jobs_add(jobs, match, pkgs, 1) == EPKG_FATAL) {
+	if (pkg_jobs_add(jobs, match, pkgs, pkgnum) == EPKG_FATAL) {
 		PyErr_SetString(PyExc_RuntimeError, "Cannot add job entries");
 		return (NULL);
 	}
