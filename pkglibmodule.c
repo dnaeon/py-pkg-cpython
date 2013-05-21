@@ -96,6 +96,7 @@ pkglib_db_open(PyObject *self, PyObject *args)
 	}
 
 	if (pkgdb_open(&db, db_type) != EPKG_OK) {
+		PyErr_SetString(PyExc_IOError, "Cannot open package database");
 		return (NULL);
 	}
 
@@ -147,6 +148,7 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
 	if ((it = pkgdb_query(db, pkgname, match)) == NULL) {
+		PyErr_SetString(PyExc_IOError, "Cannot query the package database");
 		return (NULL);
 	}
 
