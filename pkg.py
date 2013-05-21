@@ -30,6 +30,14 @@ class PkgIter(object):
 
                 return False
 
+        def __len__(self):
+                i = 0
+
+                for p in self:
+                        i += 1
+
+                return i
+                
         def __iter__(self):
                 return self
 
