@@ -53,6 +53,7 @@ static PyObject *pkglib_pkg_get_repopath(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_cksum(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_reponame(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_repourl(PyObject *self, PyObject *args);
+static PyObject *pkglib_jobs_count(PyObject *self, PyObject *args);
 
 static PyMethodDef
 PkgLibMethods[] = {
@@ -77,6 +78,7 @@ PkgLibMethods[] = {
 	{ "pkg_get_cksum",     pkglib_pkg_get_cksum,     METH_VARARGS, NULL },
 	{ "pkg_get_reponame",  pkglib_pkg_get_reponame,  METH_VARARGS, NULL },
 	{ "pkg_get_repourl",   pkglib_pkg_get_repourl,   METH_VARARGS, NULL },
+	{ "jobs_count",        pkglib_jobs_count,        METH_VARARGS, NULL },
 	{ NULL,                NULL,                     0,            NULL }, /* Sentinel */
 };
 
@@ -232,6 +234,23 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 	return (result);
 }
 
+static PyObject *
+pkglib_jobs_count(PyObject *self, PyObject *args)
+{
+	struct pkg_jobs *jobs = NULL;
+	PyObject *result = NULL;
+	PyObject *jobs_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &jobs_capsule) == 0)
+		return (NULL);
+
+	jobs = (struct pkg_jobs *)PyCapsule_GetPointer(jobs_capsule, "pkglib.jobs");
+
+	result = Py_BuildValue("i", pkg_jobs_count(jobs));
+
+	return (result);
+}
+	
 static PyObject *
 pkglib_db_query_install_iter(PyObject *self, PyObject *args)
 {

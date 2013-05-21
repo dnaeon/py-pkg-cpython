@@ -56,6 +56,9 @@ class PkgJobs(object):
         def __del__(self):
                 pass
 
+        def __len__(self):
+                return pkglib.jobs_count(self._jobs)
+                
         def __iter__(self):
                 return self
 
