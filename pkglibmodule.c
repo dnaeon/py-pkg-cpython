@@ -91,12 +91,11 @@ pkglib_db_open(PyObject *self, PyObject *args)
   
 	pkg_init(NULL);
 
-	if (PyArg_ParseTuple(args, "i", &db_type) == 0) { 
+	if (PyArg_ParseTuple(args, "i", &db_type) == 0)
 		return (NULL);
-	}
 
 	if (pkgdb_open(&db, db_type) != EPKG_OK) {
-		PyErr_SetString(PyExc_IOError, "Cannot open package database");
+		PyErr_SetString(PyExc_IOError, "Cannot open the package database");
 		return (NULL);
 	}
 
@@ -111,9 +110,8 @@ pkglib_db_close(PyObject *self, PyObject *args)
         struct pkgdb *db = NULL;
 	PyObject *db_capsule = NULL;
 
-	if (PyArg_ParseTuple(args, "O", &db_capsule) == 0) {
+	if (PyArg_ParseTuple(args, "O", &db_capsule) == 0)
 		return (NULL);
-	}
 
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
@@ -135,9 +133,8 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 	match_t match = MATCH_EXACT;
 	bool match_regex = false;
 
-	if (PyArg_ParseTuple(args, "Ozi", &db_capsule, &pkgname, &match_regex) == 0) {
+	if (PyArg_ParseTuple(args, "Ozi", &db_capsule, &pkgname, &match_regex) == 0)
 		return (NULL);
-	}
 
 	if (match_regex)
 		match = MATCH_REGEX;
@@ -189,8 +186,10 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 	pkgs = calloc(1, sizeof(char *));
 	pkgs[0] = pkgname;
 
-	if (pkg_jobs_new(&jobs, PKG_JOBS_INSTALL, db) != EPKG_OK)
+	if (pkg_jobs_new(&jobs, PKG_JOBS_INSTALL, db) != EPKG_OK) {
+		PyErr_SetString(PyExc_MemoryError, "Cannot create jobs object");
 		return (NULL);
+	}
 
 	pkg_jobs_set_flags(jobs, f);
 
@@ -198,11 +197,15 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 	 * TODO: Exceptions handling
 	 */
 
-	if (pkg_jobs_add(jobs, match, pkgs, 1) == EPKG_FATAL)
+	if (pkg_jobs_add(jobs, match, pkgs, 1) == EPKG_FATAL) {
+		PyErr_SetString(PyExc_RuntimeError, "Cannot add job entries");
 		return (NULL);
+	}
 
-	if (pkg_jobs_solve(jobs) != EPKG_OK)
+	if (pkg_jobs_solve(jobs) != EPKG_OK) {
+		PyErr_SetString(PyExc_RuntimeError, "Cannot solve jobs");
 		return (NULL);
+	}
 
 	result = PyCapsule_New(jobs, "pkglib.jobs", NULL);
 
@@ -220,9 +223,8 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 	PyObject *it_capsule = NULL;
 	PyObject *result = NULL;
 
-	if (PyArg_ParseTuple(args, "O", &it_capsule) == 0) {
+	if (PyArg_ParseTuple(args, "O", &it_capsule) == 0)
 		return (NULL);
-	}
 
 	it = (struct pkgdb_it *)PyCapsule_GetPointer(it_capsule, "pkglib.it");
 	
