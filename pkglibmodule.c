@@ -163,6 +163,7 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 		 *result = NULL;
 	char *pkgname = NULL;
 	char **pkgs;
+	int retcode;
 	match_t match = MATCH_EXACT;
 	bool match_regex = false;
 	pkg_flags f = PKG_FLAG_NONE | PKG_FLAG_PKG_VERSION_TEST;
@@ -176,6 +177,17 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 
 	if (match_regex)
 		match = MATCH_REGEX;
+
+	retcode = pkgdb_access(PKGDB_MODE_READ  |
+			       PKGDB_MODE_WRITE |
+			       PKGDB_MODE_CREATE,
+			       PKGDB_DB_LOCAL   |
+			       PKGDB_DB_REPO);
+
+	if (retcode != EPKG_OK) {
+		PyErr_SetString(PyExc_RuntimeError, "Insufficient privileges to install packages");
+		return (NULL);
+	}
 
 	/*
 	 * TODO: Check for permissions before attempting to install packages
