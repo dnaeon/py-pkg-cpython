@@ -189,10 +189,6 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 		return (NULL);
 	}
 
-	/*
-	 * TODO: Check for permissions before attempting to install packages
-	 */
-	
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
 	pkgs = calloc(1, sizeof(char *));
@@ -204,10 +200,6 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 	}
 
 	pkg_jobs_set_flags(jobs, f);
-
-	/*
-	 * TODO: Exceptions handling
-	 */
 
 	if (pkg_jobs_add(jobs, match, pkgs, 1) == EPKG_FATAL) {
 		PyErr_SetString(PyExc_RuntimeError, "Cannot add job entries");
