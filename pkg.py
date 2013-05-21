@@ -10,7 +10,7 @@ class PkgDb(object):
         def close(self):
                 pkglib.db_close(self._db)
 
-        def query(self, pkgname=None, match_regex=False):
+        def query_info(self, pkgname=None, match_regex=False):
                 return PkgIter(self._db, pkgname, match_regex)
 
         def query_install(self, pkgname, match_regex=False):
