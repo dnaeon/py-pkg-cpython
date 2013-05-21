@@ -58,6 +58,13 @@ class PkgJobs(object):
 
         def __len__(self):
                 return pkglib.jobs_count(self._jobs)
+
+        def __contains__(self, name):
+                for p in self:
+                        if p.name() == name or p.origin() == name:
+                                return True
+
+                return False
                 
         def __iter__(self):
                 return self
