@@ -76,6 +76,9 @@ class PkgJobs(object):
                         raise StopIteration
 
                 return Pkg(result)
+
+        def apply(self):
+                return pkglib.jobs_apply(self._jobs)
                         
 class Pkg(object):
         def __init__(self, pkg):

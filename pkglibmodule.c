@@ -54,6 +54,7 @@ static PyObject *pkglib_pkg_get_cksum(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_reponame(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_repourl(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_count(PyObject *self, PyObject *args);
+static PyObject *pkglib_jobs_apply(PyObject *self, PyObject *args);
 
 static PyMethodDef
 PkgLibMethods[] = {
@@ -79,6 +80,7 @@ PkgLibMethods[] = {
 	{ "pkg_get_reponame",  pkglib_pkg_get_reponame,  METH_VARARGS, NULL },
 	{ "pkg_get_repourl",   pkglib_pkg_get_repourl,   METH_VARARGS, NULL },
 	{ "jobs_count",        pkglib_jobs_count,        METH_VARARGS, NULL },
+	{ "jobs_apply",        pkglib_jobs_apply,        METH_VARARGS, NULL },
 	{ NULL,                NULL,                     0,            NULL }, /* Sentinel */
 };
 
@@ -273,7 +275,33 @@ pkglib_jobs_count(PyObject *self, PyObject *args)
 
 	return (result);
 }
-	
+
+static PyObject *
+pkglib_jobs_apply(PyObject *self, PyObject *args)
+{
+	struct pkg_jobs *jobs = NULL;
+	PyObject *result = NULL;
+	PyObject *jobs_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &jobs_capsule) == 0)
+		return (NULL);
+
+	jobs = (struct pkg_jobs *)PyCapsule_GetPointer(jobs_capsule, "pkglib.jobs");
+
+	if (pkg_jobs_count(jobs) == 0) {
+		Py_INCREF(Py_None);
+		return (Py_None);
+	}
+
+	if (pkg_jobs_apply(jobs) != EPKG_OK) {
+		PyErr_SetString(PyExc_RuntimeError, "Cannot apply package jobs");
+		return (NULL);
+	}
+
+	Py_INCREF(Py_None);
+	return (Py_None);
+}
+
 static PyObject *
 pkglib_db_query_install_iter(PyObject *self, PyObject *args)
 {
