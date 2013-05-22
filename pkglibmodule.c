@@ -232,6 +232,13 @@ _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
 
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
+	/* Re-open the database in remote mode if needed */
+	if (t == PKG_JOBS_INSTALL)
+		if (pkgdb_open(&db, PKGDB_REMOTE) != EPKG_OK) {
+			PyErr_SetString(PyExc_IOError, "Cannot open the package database");
+			return (NULL);
+		}
+	
 	if (pkg_jobs_new(&jobs, t, db) != EPKG_OK) {
 		PyErr_SetString(PyExc_MemoryError, "Cannot create jobs object");
 		return (NULL);
