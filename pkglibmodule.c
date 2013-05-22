@@ -238,9 +238,6 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 {
 	struct pkg *pkg = NULL;
 	struct pkgdb_it *it = NULL;
-	const char *name = NULL,
-		   *version = NULL,
-		   *comment = NULL;
 	PyObject *it_capsule = NULL;
 	PyObject *result = NULL;
 
@@ -310,10 +307,6 @@ pkglib_db_query_install_iter(PyObject *self, PyObject *args)
 	PyObject *result = NULL;
 	PyObject *jobs_capsule = NULL;
 
-	/*
-	 * TODO: Error and exceptions handling
-	 */
-	
 	if (PyArg_ParseTuple(args, "O", &jobs_capsule) == 0)
 		return (NULL);
 
