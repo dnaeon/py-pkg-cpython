@@ -56,6 +56,8 @@ static PyObject *pkglib_pkg_get_repourl(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_count(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_apply(PyObject *self, PyObject *args);
 
+static PyObject *_pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t);
+
 static PyMethodDef
 PkgLibMethods[] = {
 	{ "db_open",           pkglib_db_open,           METH_VARARGS, NULL },
@@ -159,6 +161,15 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 static PyObject *
 pkglib_db_query_install(PyObject *self, PyObject *args)
 {
+	pkg_flags f = PKG_FLAG_NONE | PKG_FLAG_PKG_VERSION_TEST;
+	pkg_jobs_t t = PKG_JOBS_INSTALL;
+
+	return (_pkglib_jobs_prep(self, args, f, t));
+}
+
+static PyObject *
+_pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
+{
 	struct pkgdb *db = NULL;
 	struct pkg_jobs *jobs = NULL;
 	PyObject *db_capsule = NULL,
@@ -168,7 +179,6 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 	int pkgnum, retcode, i;
 	match_t match = MATCH_EXACT;
 	bool match_regex = false;
-	pkg_flags f = PKG_FLAG_NONE | PKG_FLAG_PKG_VERSION_TEST;
 	
 	if (PyArg_ParseTuple(args, "OOi", &db_capsule, &pkglist, &match_regex) == 0) 
 		return (NULL);
@@ -211,7 +221,7 @@ pkglib_db_query_install(PyObject *self, PyObject *args)
 
 	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
 
-	if (pkg_jobs_new(&jobs, PKG_JOBS_INSTALL, db) != EPKG_OK) {
+	if (pkg_jobs_new(&jobs, t, db) != EPKG_OK) {
 		PyErr_SetString(PyExc_MemoryError, "Cannot create jobs object");
 		return (NULL);
 	}
