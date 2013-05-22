@@ -37,7 +37,6 @@ static PyObject *pkglib_db_close(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_info(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_iter(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_install(PyObject *self, PyObject *args);
-static PyObject *pkglib_db_query_install_iter(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_name(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_version(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_comment(PyObject *self, PyObject *args);
@@ -55,6 +54,7 @@ static PyObject *pkglib_pkg_get_reponame(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_repourl(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_count(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_apply(PyObject *self, PyObject *args);
+static PyObject *pkglib_jobs_iter(PyObject *self, PyObject *args);
 
 static PyObject *_pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t);
 
@@ -65,7 +65,6 @@ PkgLibMethods[] = {
 	{ "db_query_info",     pkglib_db_query_info,     METH_VARARGS, NULL },
 	{ "db_query_iter",     pkglib_db_query_iter,     METH_VARARGS, NULL },
 	{ "db_query_install",  pkglib_db_query_install,  METH_VARARGS, NULL },
-	{ "db_query_install_iter", pkglib_db_query_install_iter, METH_VARARGS, NULL },
 	{ "pkg_get_name",      pkglib_pkg_get_name,      METH_VARARGS, NULL },
 	{ "pkg_get_version",   pkglib_pkg_get_version,   METH_VARARGS, NULL },
 	{ "pkg_get_comment",   pkglib_pkg_get_comment,   METH_VARARGS, NULL },
@@ -83,6 +82,7 @@ PkgLibMethods[] = {
 	{ "pkg_get_repourl",   pkglib_pkg_get_repourl,   METH_VARARGS, NULL },
 	{ "jobs_count",        pkglib_jobs_count,        METH_VARARGS, NULL },
 	{ "jobs_apply",        pkglib_jobs_apply,        METH_VARARGS, NULL },
+	{ "jobs_iter",         pkglib_jobs_iter,         METH_VARARGS, NULL },
 	{ NULL,                NULL,                     0,            NULL }, /* Sentinel */
 };
 
@@ -310,7 +310,7 @@ pkglib_jobs_apply(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pkglib_db_query_install_iter(PyObject *self, PyObject *args)
+pkglib_jobs_iter(PyObject *self, PyObject *args)
 {
 	static struct pkg *pkg = NULL;
 	struct pkg_jobs *jobs = NULL;

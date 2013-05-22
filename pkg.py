@@ -70,7 +70,7 @@ class PkgJobs(object):
                 return self
 
         def next(self):
-                result = pkglib.db_query_install_iter(self._jobs)
+                result = pkglib.jobs_iter(self._jobs)
 
                 if not result:
                         raise StopIteration
