@@ -37,6 +37,7 @@ static PyObject *pkglib_db_close(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_info(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_iter(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_install(PyObject *self, PyObject *args);
+static PyObject *pkglib_db_query_delete(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_name(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_version(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_comment(PyObject *self, PyObject *args);
@@ -65,6 +66,7 @@ PkgLibMethods[] = {
 	{ "db_query_info",     pkglib_db_query_info,     METH_VARARGS, NULL },
 	{ "db_query_iter",     pkglib_db_query_iter,     METH_VARARGS, NULL },
 	{ "db_query_install",  pkglib_db_query_install,  METH_VARARGS, NULL },
+	{ "db_query_delete",   pkglib_db_query_delete,   METH_VARARGS, NULL },
 	{ "pkg_get_name",      pkglib_pkg_get_name,      METH_VARARGS, NULL },
 	{ "pkg_get_version",   pkglib_pkg_get_version,   METH_VARARGS, NULL },
 	{ "pkg_get_comment",   pkglib_pkg_get_comment,   METH_VARARGS, NULL },
@@ -161,11 +163,20 @@ pkglib_db_query_info(PyObject *self, PyObject *args)
 static PyObject *
 pkglib_db_query_install(PyObject *self, PyObject *args)
 {
-	pkg_flags f = PKG_FLAG_NONE | PKG_FLAG_PKG_VERSION_TEST;
+	pkg_flags  f = PKG_FLAG_NONE | PKG_FLAG_PKG_VERSION_TEST;
 	pkg_jobs_t t = PKG_JOBS_INSTALL;
 
 	return (_pkglib_jobs_prep(self, args, f, t));
 }
+
+static PyObject *
+pkglib_db_query_delete(PyObject *self, PyObject *args)
+{
+	pkg_flags  f = PKG_FLAG_NONE;
+	pkg_jobs_t t = PKG_JOBS_DEINSTALL;
+
+	return (_pkglib_jobs_prep(self, args, f, t));
+}     
 
 static PyObject *
 _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
@@ -329,6 +340,7 @@ pkglib_jobs_iter(PyObject *self, PyObject *args)
 
 	return (result);
 }
+
 static PyObject *
 pkglib_pkg_get_name(PyObject *self, PyObject *args)
 {
