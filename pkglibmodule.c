@@ -58,6 +58,7 @@ static PyObject *pkglib_jobs_apply(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_iter(PyObject *self, PyObject *args);
 
 static PyObject *_pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t);
+static char     **_pkglib_build_pkg_args(PyObject *pkglist, int *pkgnum);
 
 static PyMethodDef
 PkgLibMethods[] = {
@@ -190,34 +191,34 @@ _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
 	int pkgnum, retcode, i;
 	match_t match = MATCH_EXACT;
 	bool match_regex = false;
-	
-	if (PyArg_ParseTuple(args, "OOi", &db_capsule, &pkglist, &match_regex) == 0) 
+
+	if (t == PKG_JOBS_INSTALL || t == PKG_JOBS_DEINSTALL) {
+		if (PyArg_ParseTuple(args, "OOi", &db_capsule, &pkglist, &match_regex) == 0) 
+			return (NULL);
+	} else if (t == PKG_JOBS_AUTOREMOVE || PKG_JOBS_UPGRADE) {
+		if (PyArg_ParseTuple(args, "O", &db_capsule) == 0)
+			return (NULL);
+	} else {
+		PyErr_SetString(PyExc_NotImplementedError, "Jobs type not implemented");
 		return (NULL);
+	}
 
 	if (match_regex)
 		match = MATCH_REGEX;
 
-	/* Parse multiple packages passed as a list */
-	if (PyList_Check(pkglist)) {
-		pkgnum = PyList_Size(pkglist);
-		
-		if ((pkgs = calloc(pkgnum, sizeof(char *))) == NULL) {
-			PyErr_SetString(PyExc_MemoryError, NULL);
+	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
+
+	/* Re-open the database in remote mode if needed */
+	if (t == PKG_JOBS_INSTALL || t == PKG_JOBS_UPGRADE)
+		if (pkgdb_open(&db, PKGDB_REMOTE) != EPKG_OK) {
+			PyErr_SetString(PyExc_IOError, "Cannot open the package database");
 			return (NULL);
 		}
 
-		for (i = 0; i < pkgnum; i++)
-			pkgs[i] = PyString_AsString(PyList_GetItem(pkglist, i));
-
-	} else if (PyString_Check(pkglist)) {
-		/* Only a single package name provided as a string */
-		pkgnum = 1;
-		pkgs = calloc(pkgnum, sizeof(char *));
-		pkgs[0] = PyString_AsString(pkglist);
-	} else {
-		PyErr_SetString(PyExc_TypeError, "Package name(s) should be a list or a string");
-		return (NULL);
-	}
+	/* Parse any package names provided if installing/deinstalling */
+	if (t == PKG_JOBS_INSTALL || t == PKG_JOBS_DEINSTALL)
+		if ((pkgs = _pkglib_build_pkg_args(pkglist, &pkgnum)) == NULL)
+			return (NULL);
 	
 	retcode = pkgdb_access(PKGDB_MODE_READ  |
 			       PKGDB_MODE_WRITE |
@@ -229,15 +230,6 @@ _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
 		PyErr_SetString(PyExc_RuntimeError, "Insufficient privileges to install packages");
 		return (NULL);
 	}
-
-	db = (struct pkgdb *)PyCapsule_GetPointer(db_capsule, "pkglib.db");
-
-	/* Re-open the database in remote mode if needed */
-	if (t == PKG_JOBS_INSTALL)
-		if (pkgdb_open(&db, PKGDB_REMOTE) != EPKG_OK) {
-			PyErr_SetString(PyExc_IOError, "Cannot open the package database");
-			return (NULL);
-		}
 	
 	if (pkg_jobs_new(&jobs, t, db) != EPKG_OK) {
 		PyErr_SetString(PyExc_MemoryError, "Cannot create jobs object");
@@ -246,10 +238,12 @@ _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
 
 	pkg_jobs_set_flags(jobs, f);
 
-	if (pkg_jobs_add(jobs, match, pkgs, pkgnum) == EPKG_FATAL) {
-		PyErr_SetString(PyExc_RuntimeError, "Cannot add job entries");
-		return (NULL);
-	}
+	/* Add jobs if installing/deinstalling */
+	if (t == PKG_JOBS_INSTALL || t == PKG_JOBS_DEINSTALL)
+		if (pkg_jobs_add(jobs, match, pkgs, pkgnum) == EPKG_FATAL) {
+			PyErr_SetString(PyExc_RuntimeError, "Cannot add job entries");
+			return (NULL);
+		}
 
 	if (pkg_jobs_solve(jobs) != EPKG_OK) {
 		PyErr_SetString(PyExc_RuntimeError, "Cannot solve jobs");
@@ -259,6 +253,39 @@ _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
 	result = PyCapsule_New(jobs, "pkglib.jobs", NULL);
 
 	return (result);
+}
+
+static char **
+_pkglib_build_pkg_args(PyObject *pkglist, int *pkgnum)
+{
+	char **pkgs = NULL;
+	int i;
+	
+	*(pkgnum) = 0;
+	
+	/* Parse multiple packages passed as a list */
+	if (PyList_Check(pkglist)) {
+		*(pkgnum) = PyList_Size(pkglist);
+		
+		if ((pkgs = calloc(*(pkgnum), sizeof(char *))) == NULL) {
+			PyErr_SetString(PyExc_MemoryError, NULL);
+			return (NULL);
+		}
+
+		for (i = 0; i < *(pkgnum); i++)
+			pkgs[i] = PyString_AsString(PyList_GetItem(pkglist, i));
+
+	} else if (PyString_Check(pkglist)) {
+		/* Only a single package name provided as a string */
+		*(pkgnum) = 1;
+		pkgs = calloc(*(pkgnum), sizeof(char *));
+		pkgs[0] = PyString_AsString(pkglist);
+	} else {
+		PyErr_SetString(PyExc_TypeError, "Package name(s) should be a list or a string");
+		return (NULL);
+	}
+
+	return (pkgs);
 }
 
 static PyObject *
