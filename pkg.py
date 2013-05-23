@@ -22,7 +22,11 @@ class PkgDb(object):
                 return PkgJobs(j)
 
         def query_autoremove(self):
-                j = pkglib.db_query_autoremove(self._db);
+                j = pkglib.db_query_autoremove(self._db)
+                return PkgJobs(j)
+
+        def query_upgrade(self):
+                j = pkglib.db_query_upgrade(self._db)
                 return PkgJobs(j)
 
 class PkgIter(object):
