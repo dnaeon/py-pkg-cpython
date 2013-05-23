@@ -21,6 +21,10 @@ class PkgDb(object):
                 j = pkglib.db_query_delete(self._db, pkgname, match_regex)
                 return PkgJobs(j)
 
+        def query_autoremove(self):
+                j = pkglib.db_query_autoremove(self._db);
+                return PkgJobs(j)
+
 class PkgIter(object):
         def __init__(self, db, pkgname, match_regex=False):
                 self._it = pkglib.db_query_info(db, pkgname, match_regex)

@@ -38,6 +38,7 @@ static PyObject *pkglib_db_query_info(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_iter(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_install(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_delete(PyObject *self, PyObject *args);
+static PyObject *pkglib_db_query_autoremove(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_name(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_version(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_comment(PyObject *self, PyObject *args);
@@ -62,31 +63,32 @@ static char     **_pkglib_build_pkg_args(PyObject *pkglist, int *pkgnum);
 
 static PyMethodDef
 PkgLibMethods[] = {
-	{ "db_open",           pkglib_db_open,           METH_VARARGS, NULL },
-	{ "db_close",          pkglib_db_close,          METH_VARARGS, NULL },
-	{ "db_query_info",     pkglib_db_query_info,     METH_VARARGS, NULL },
-	{ "db_query_iter",     pkglib_db_query_iter,     METH_VARARGS, NULL },
-	{ "db_query_install",  pkglib_db_query_install,  METH_VARARGS, NULL },
-	{ "db_query_delete",   pkglib_db_query_delete,   METH_VARARGS, NULL },
-	{ "pkg_get_name",      pkglib_pkg_get_name,      METH_VARARGS, NULL },
-	{ "pkg_get_version",   pkglib_pkg_get_version,   METH_VARARGS, NULL },
-	{ "pkg_get_comment",   pkglib_pkg_get_comment,   METH_VARARGS, NULL },
-	{ "pkg_get_origin",    pkglib_pkg_get_origin,    METH_VARARGS, NULL },
-	{ "pkg_get_desc",      pkglib_pkg_get_desc,      METH_VARARGS, NULL },
-	{ "pkg_get_mesg",      pkglib_pkg_get_mesg,      METH_VARARGS, NULL },
-	{ "pkg_get_arch",      pkglib_pkg_get_arch,      METH_VARARGS, NULL },
-	{ "pkg_get_maint",     pkglib_pkg_get_maint,     METH_VARARGS, NULL },
-	{ "pkg_get_www",       pkglib_pkg_get_www,       METH_VARARGS, NULL },
-	{ "pkg_get_prefix",    pkglib_pkg_get_prefix,    METH_VARARGS, NULL },
-	{ "pkg_get_infos",     pkglib_pkg_get_infos,     METH_VARARGS, NULL },
-	{ "pkg_get_repopath",  pkglib_pkg_get_repopath,  METH_VARARGS, NULL },
-	{ "pkg_get_cksum",     pkglib_pkg_get_cksum,     METH_VARARGS, NULL },
-	{ "pkg_get_reponame",  pkglib_pkg_get_reponame,  METH_VARARGS, NULL },
-	{ "pkg_get_repourl",   pkglib_pkg_get_repourl,   METH_VARARGS, NULL },
-	{ "jobs_count",        pkglib_jobs_count,        METH_VARARGS, NULL },
-	{ "jobs_apply",        pkglib_jobs_apply,        METH_VARARGS, NULL },
-	{ "jobs_iter",         pkglib_jobs_iter,         METH_VARARGS, NULL },
-	{ NULL,                NULL,                     0,            NULL }, /* Sentinel */
+	{ "db_open",              pkglib_db_open,               METH_VARARGS, NULL },
+	{ "db_close",             pkglib_db_close,              METH_VARARGS, NULL },
+	{ "db_query_info",        pkglib_db_query_info,         METH_VARARGS, NULL },
+	{ "db_query_iter",        pkglib_db_query_iter,         METH_VARARGS, NULL },
+	{ "db_query_install",     pkglib_db_query_install,      METH_VARARGS, NULL },
+	{ "db_query_delete",      pkglib_db_query_delete,       METH_VARARGS, NULL },
+	{ "db_query_autoremove",  pkglib_db_query_autoremove,   METH_VARARGS, NULL }, 
+	{ "pkg_get_name",         pkglib_pkg_get_name,          METH_VARARGS, NULL },
+	{ "pkg_get_version",      pkglib_pkg_get_version,       METH_VARARGS, NULL },
+	{ "pkg_get_comment",      pkglib_pkg_get_comment,       METH_VARARGS, NULL },
+	{ "pkg_get_origin",       pkglib_pkg_get_origin,        METH_VARARGS, NULL },
+	{ "pkg_get_desc",         pkglib_pkg_get_desc,          METH_VARARGS, NULL },
+	{ "pkg_get_mesg",         pkglib_pkg_get_mesg,          METH_VARARGS, NULL },
+	{ "pkg_get_arch",         pkglib_pkg_get_arch,          METH_VARARGS, NULL },
+	{ "pkg_get_maint",        pkglib_pkg_get_maint,         METH_VARARGS, NULL },
+	{ "pkg_get_www",          pkglib_pkg_get_www,           METH_VARARGS, NULL },
+	{ "pkg_get_prefix",       pkglib_pkg_get_prefix,        METH_VARARGS, NULL },
+	{ "pkg_get_infos",        pkglib_pkg_get_infos,         METH_VARARGS, NULL },
+	{ "pkg_get_repopath",     pkglib_pkg_get_repopath,      METH_VARARGS, NULL },
+	{ "pkg_get_cksum",        pkglib_pkg_get_cksum,         METH_VARARGS, NULL },
+	{ "pkg_get_reponame",     pkglib_pkg_get_reponame,      METH_VARARGS, NULL },
+	{ "pkg_get_repourl",      pkglib_pkg_get_repourl,       METH_VARARGS, NULL },
+	{ "jobs_count",           pkglib_jobs_count,            METH_VARARGS, NULL },
+	{ "jobs_apply",           pkglib_jobs_apply,            METH_VARARGS, NULL },
+	{ "jobs_iter",            pkglib_jobs_iter,             METH_VARARGS, NULL },
+	{ NULL,                   NULL,                         0,            NULL }, /* Sentinel */
 };
 
 static PyObject *
@@ -177,7 +179,16 @@ pkglib_db_query_delete(PyObject *self, PyObject *args)
 	pkg_jobs_t t = PKG_JOBS_DEINSTALL;
 
 	return (_pkglib_jobs_prep(self, args, f, t));
-}     
+}
+
+static PyObject *
+pkglib_db_query_autoremove(PyObject *self, PyObject *args)
+{
+	pkg_flags  f = PKG_FLAG_FORCE;
+	pkg_jobs_t t = PKG_JOBS_AUTOREMOVE;
+
+	return (_pkglib_jobs_prep(self, args, f, t));
+}
 
 static PyObject *
 _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
@@ -227,7 +238,7 @@ _pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t)
 			       PKGDB_DB_REPO);
 
 	if (retcode != EPKG_OK) {
-		PyErr_SetString(PyExc_RuntimeError, "Insufficient privileges to install packages");
+		PyErr_SetString(PyExc_RuntimeError, "Insufficient privileges");
 		return (NULL);
 	}
 	
