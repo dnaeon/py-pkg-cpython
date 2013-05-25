@@ -5,7 +5,8 @@ class PkgDb(object):
                 self._db = pkglib.db_open(remotedb)
 
         def __del__(self):
-                pkglib.db_close(self._db)
+                #pkglib.db_close(self._db)
+                pass
 
         def close(self):
                 return pkglib.db_close(self._db)
@@ -54,7 +55,8 @@ class PkgIter(object):
                 self._flags = self.__class__._load_flags['PKG_LOAD_BASIC']
         
         def __del__(self):
-                pkglib.db_query_iter_free(self._it)
+                #pkglib.db_query_iter_free(self._it)
+                pass
 
         def __contains__(self, name):
                 for p in self:
@@ -132,7 +134,8 @@ class PkgJobs(object):
                 self._jobs = jobs
 
         def __del__(self):
-                pkglib.jobs_free(self._jobs)
+                #pkglib.jobs_free(self._jobs)
+                pass
 
         def __len__(self):
                 return pkglib.jobs_count(self._jobs)
@@ -166,7 +169,8 @@ class Pkg(object):
                 self._pkg = pkg
 
         def __del__(self):
-                pkglib.pkg_free(self._pkg)
+                #pkglib.pkg_free(self._pkg)
+                pass
 
         def __str__(self):
                 return '%s-%s: %s' % (self.name(), self.version(), self.comment())
