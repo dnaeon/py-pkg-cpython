@@ -252,7 +252,9 @@ class PkgDep(object):
                 return pkglib.pkg_dep_name(self._dep)
 
         def version(self):
-                pass
+                return pkglib.pkg_dep_version(self._dep)
 
         def origin(self):
-                pass
+                return pkglib.pkg_dep_origin(self._dep)
+
+
