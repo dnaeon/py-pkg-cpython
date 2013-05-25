@@ -246,6 +246,14 @@ class PkgDepIter(object):
 
                 return False
 
+        def __len__(self):
+                i = 0
+
+                for d in self:
+                        i += 1
+
+                return i
+                
         def next(self):
                 result = pkglib.pkg_dep_iter(self._pkg)
 
