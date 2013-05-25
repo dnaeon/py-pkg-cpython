@@ -106,6 +106,11 @@ pkglib_db_open(PyObject *self, PyObject *args)
 	PyObject *result = NULL;
 	pkgdb_t db_type;
   
+	if (pkg_initialized()) {
+		PyErr_SetString(PyExc_RuntimeError, "Database has already been initialized");
+		return (NULL);
+	}
+	
 	pkg_init(NULL);
 
 	if (PyArg_ParseTuple(args, "i", &db_type) == 0)
