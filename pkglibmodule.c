@@ -442,8 +442,11 @@ pkglib_jobs_iter(PyObject *self, PyObject *args)
 
 	if (pkg_jobs(jobs, &pkg) == EPKG_OK)
 		result = PyCapsule_New(pkg, "pkglib.pkg", NULL);
-	else
+	else {
+		pkg = NULL;
+		Py_INCREF(Py_None);
 		result = Py_None;
+	}
 
 	return (result);
 }
