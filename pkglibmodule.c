@@ -58,6 +58,7 @@ static PyObject *pkglib_pkg_get_repourl(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_count(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_apply(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_iter(PyObject *self, PyObject *args);
+static PyObject *pkglib_jobs_free(PyObject *self, PyObject *args);
 
 static PyObject *_pkglib_jobs_prep(PyObject *self, PyObject *args, pkg_flags f, pkg_jobs_t t);
 static char     **_pkglib_build_pkg_args(PyObject *pkglist, int *pkgnum);
@@ -90,6 +91,7 @@ PkgLibMethods[] = {
 	{ "jobs_count",           pkglib_jobs_count,            METH_VARARGS, NULL },
 	{ "jobs_apply",           pkglib_jobs_apply,            METH_VARARGS, NULL },
 	{ "jobs_iter",            pkglib_jobs_iter,             METH_VARARGS, NULL },
+	{ "jobs_free",            pkglib_jobs_free,             METH_VARARGS, NULL },
 	{ NULL,                   NULL,                         0,            NULL }, /* Sentinel */
 };
 
@@ -348,6 +350,25 @@ pkglib_jobs_count(PyObject *self, PyObject *args)
 	result = Py_BuildValue("i", pkg_jobs_count(jobs));
 
 	return (result);
+}
+
+static PyObject *
+pkglib_jobs_free(PyObject *self, PyObject *args)
+{
+	struct pkg_jobs *jobs = NULL;
+	PyObject *jobs_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &jobs_capsule) == 0)
+		return (NULL);
+
+	jobs = (struct pkg_jobs *)PyCapsule_GetPointer(jobs_capsule, "pkglib.jobs");
+
+	pkg_jobs_free(jobs);
+
+	Py_DECREF(jobs_capsule);
+	
+	Py_INCREF(Py_None);
+	return (Py_None);
 }
 
 static PyObject *

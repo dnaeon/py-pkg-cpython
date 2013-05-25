@@ -67,7 +67,7 @@ class PkgJobs(object):
                 self._jobs = jobs
 
         def __del__(self):
-                pass
+                pkglib.jobs_free(self._jobs)
 
         def __len__(self):
                 return pkglib.jobs_count(self._jobs)
@@ -92,6 +92,9 @@ class PkgJobs(object):
 
         def apply(self):
                 return pkglib.jobs_apply(self._jobs)
+
+        def free(self):
+                pkglib.jobs_free(self._jobs)
                         
 class Pkg(object):
         def __init__(self, pkg):
