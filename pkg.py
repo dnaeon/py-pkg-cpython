@@ -173,7 +173,7 @@ class Pkg(object):
                 pass
 
         def __str__(self):
-                return '%s-%s: %s' % (self.name(), self.version(), self.comment())
+                return '%s-%s' % (self.name(), self.version())
 
         def __repr__(self):
                 return self.origin()
@@ -269,6 +269,9 @@ class PkgDep(object):
         def __del__(self):
                 pass
 
+        def __str__(self):
+                return '%s-%s' % (self.name(), self.version())
+                
         def name(self):
                 return pkglib.pkg_dep_name(self._dep)
 
