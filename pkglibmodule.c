@@ -763,7 +763,7 @@ static PyObject *
 pkglib_pkg_dep_iter(PyObject *self, PyObject *args)
 {
 	struct pkg *pkg = NULL;
-	struct pkg_dep *dep = NULL;
+	static struct pkg_dep *dep = NULL;
 	PyObject *result = NULL;
 	PyObject *pkg_capsule = NULL;
 
@@ -774,8 +774,11 @@ pkglib_pkg_dep_iter(PyObject *self, PyObject *args)
 
 	if (pkg_deps(pkg, &dep) == EPKG_OK)
 		result = PyCapsule_New(dep, "pkglib.dep", NULL);
-	else
+	else {
+		dep = NULL;
 		result = Py_None;
+		Py_INCREF(Py_None);
+	}
 	
 	return (result);
 }
