@@ -226,3 +226,33 @@ class Pkg(object):
         def repourl(self):
                 return pkglib.pkg_get_repourl(self._pkg)
 
+        def deps(self):
+                return PkgDepIter(self._pkg)
+
+class PkgDepIter(object):
+        def __init__(self, pkg):
+                self._pkg = pkg
+
+        def __iter__(self):
+                return self
+
+        def next(self):
+                result = pkglib.pkg_dep_iter(self._pkg)
+
+                if not result:
+                        raise StopIteration
+
+                return PkgDep(result)
+
+class PkgDep(object):
+        def __init__(self, dep):
+                self._dep = dep;
+
+        def name(self):
+                return pkglib.pkg_dep_name(self._dep)
+
+        def version(self):
+                pass
+
+        def origin(self):
+                pass

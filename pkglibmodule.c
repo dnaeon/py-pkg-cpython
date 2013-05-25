@@ -56,6 +56,8 @@ static PyObject *pkglib_pkg_get_repopath(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_cksum(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_reponame(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_get_repourl(PyObject *self, PyObject *args);
+static PyObject *pkglib_pkg_dep_iter(PyObject *self, PyObject *args);
+static PyObject *pkglib_pkg_dep_name(PyObject *self, PyObject *args);
 static PyObject *pkglib_pkg_free(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_count(PyObject *self, PyObject *args);
 static PyObject *pkglib_jobs_apply(PyObject *self, PyObject *args);
@@ -91,6 +93,8 @@ PkgLibMethods[] = {
 	{ "pkg_get_cksum",        pkglib_pkg_get_cksum,         METH_VARARGS, NULL },
 	{ "pkg_get_reponame",     pkglib_pkg_get_reponame,      METH_VARARGS, NULL },
 	{ "pkg_get_repourl",      pkglib_pkg_get_repourl,       METH_VARARGS, NULL },
+	{ "pkg_dep_iter",         pkglib_pkg_dep_iter,          METH_VARARGS, NULL },
+	{ "pkg_dep_name",         pkglib_pkg_dep_name,          METH_VARARGS, NULL },
 	{ "pkg_free",             pkglib_pkg_free,              METH_VARARGS, NULL },
 	{ "jobs_count",           pkglib_jobs_count,            METH_VARARGS, NULL },
 	{ "jobs_apply",           pkglib_jobs_apply,            METH_VARARGS, NULL },
@@ -747,6 +751,47 @@ pkglib_pkg_get_repourl(PyObject *self, PyObject *args)
 	pkg_get(pkg, PKG_REPOURL, &repourl);
 
 	result = (PyObject *)Py_BuildValue("s", repourl);
+
+	return (result);
+}
+
+static PyObject *
+pkglib_pkg_dep_iter(PyObject *self, PyObject *args)
+{
+	struct pkg *pkg = NULL;
+	struct pkg_dep *dep = NULL;
+	PyObject *result = NULL;
+	PyObject *pkg_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &pkg_capsule) == 0)
+		return (NULL);
+
+	pkg = (struct pkg *)PyCapsule_GetPointer(pkg_capsule, "pkglib.pkg");
+
+	if (pkg_deps(pkg, &dep) == EPKG_OK)
+		result = PyCapsule_New(dep, "pkglib.dep", NULL);
+	else
+		result = Py_None;
+	
+	return (result);
+}
+
+static PyObject *
+pkglib_pkg_dep_name(PyObject *self, PyObject *args)
+{
+	struct pkg_dep *dep = NULL;
+	PyObject *dep_capsule = NULL;
+	PyObject *result = NULL;
+	const char *name = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &dep_capsule) == 0)
+		return (NULL);
+
+	dep = (struct pkg_dep *)PyCapsule_GetPointer(dep_capsule, "pkglib.dep");
+
+	name = pkg_dep_get(dep, PKG_DEP_NAME);
+	
+	result = (PyObject *)Py_BuildValue("s", name);
 
 	return (result);
 }
