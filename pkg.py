@@ -8,7 +8,7 @@ class PkgDb(object):
                 pkglib.db_close(self._db)
 
         def close(self):
-                pkglib.db_close(self._db)
+                return pkglib.db_close(self._db)
 
         def query_info(self, pkgname=None, match_regex=False):
                 i = pkglib.db_query_info(self._db, pkgname, match_regex)
@@ -64,7 +64,7 @@ class PkgIter(object):
                         return Pkg(result)
 
         def free(self):
-                pkglib.db_query_iter_free(self._it)
+                return pkglib.db_query_iter_free(self._it)
 
 class PkgJobs(object):
         def __init__(self, jobs):
@@ -98,20 +98,23 @@ class PkgJobs(object):
                 return pkglib.jobs_apply(self._jobs)
 
         def free(self):
-                pkglib.jobs_free(self._jobs)
+                return pkglib.jobs_free(self._jobs)
                         
 class Pkg(object):
         def __init__(self, pkg):
                 self._pkg = pkg
 
         def __del__(self):
-                pass
+                pkglib.pkg_free(self._pkg)
 
         def __str__(self):
                 return '%s-%s: %s' % (self.name(), self.version(), self.comment())
 
         def __repr__(self):
                 return self.origin()
+
+        def free(self):
+                return pkglib.pkg_free(self._pkg)
 
         def name(self):
                 return pkglib.pkg_get_name(self._pkg)
