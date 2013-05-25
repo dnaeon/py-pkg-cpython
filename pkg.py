@@ -31,9 +31,28 @@ class PkgDb(object):
                 return PkgJobs(j)
 
 class PkgIter(object):
+        _load_flags = {
+                'PKG_LOAD_BASIC'           : 0,
+                'PKG_LOAD_DEPS'            : (1 << 0),
+                'PKG_LOAD_RDEPS'           : (1 << 1),
+                'PKG_LOAD_FILES'           : (1 << 2),
+                'PKG_LOAD_SCRIPTS'         : (1 << 3),
+                'PKG_LOAD_OPTIONS'         : (1 << 4),
+                'PKG_LOAD_MTREE'           : (1 << 5),
+                'PKG_LOAD_DIRS'            : (1 << 6),
+                'PKG_LOAD_CATEGORIES'      : (1 << 7),
+                'PKG_LOAD_LICENSES'        : (1 << 8),
+                'PKG_LOAD_USERS'           : (1 << 9),
+                'PKG_LOAD_GROUPS'          : (1 << 10),
+                'PKG_LOAD_SHLIBS_REQUIRED' : (1 << 11),
+                'PKG_LOAD_SHLIBS_PROVIDED' : (1 << 12),
+                'PKG_LOAD_ANNOTATIONS'     : (1 << 13),
+        }
+                
         def __init__(self, it):
                 self._it = it
-
+                self._flags = self.__class__._load_flags['PKG_LOAD_BASIC']
+        
         def __del__(self):
                 pkglib.db_query_iter_free(self._it)
 
@@ -56,7 +75,7 @@ class PkgIter(object):
                 return self
 
         def next(self):
-                result = pkglib.db_query_iter(self._it)
+                result = pkglib.db_query_iter(self._it, self._flags)
 
                 if not result:
                         raise StopIteration
@@ -65,6 +84,48 @@ class PkgIter(object):
 
         def free(self):
                 return pkglib.db_query_iter_free(self._it)
+
+        def load_deps(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_DEPS']
+
+        def load_rdeps(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_RDEPS']
+
+        def load_files(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_FILES']
+
+        def load_scripts(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_SCRIPTS']
+
+        def load_options(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_OPTIONS']
+
+        def load_mtree(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_MTREE']
+
+        def load_dirs(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_DIRS']
+
+        def load_categories(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_CATEGORIES']
+
+        def load_licenses(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_LICENSES']
+
+        def load_users(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_USERS']
+
+        def load_groups(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_GROUPS']
+
+        def load_shlibs_required(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_SHLIBS_REQUIRED']
+
+        def load_shlibs_provided(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_SHLIBS_PROVIDED']
+
+        def load_annotations(self):
+                self._flags |= self.__class__._load_flags['PKG_LOAD_ANNOTATIONS']
 
 class PkgJobs(object):
         def __init__(self, jobs):

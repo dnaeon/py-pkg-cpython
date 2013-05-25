@@ -329,13 +329,14 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 	struct pkgdb_it *it = NULL;
 	PyObject *it_capsule = NULL;
 	PyObject *result = NULL;
+	unsigned flags;
 
-	if (PyArg_ParseTuple(args, "O", &it_capsule) == 0)
+	if (PyArg_ParseTuple(args, "Oi", &it_capsule, &flags) == 0)
 		return (NULL);
 
 	it = (struct pkgdb_it *)PyCapsule_GetPointer(it_capsule, "pkglib.it");
 	
-	if (pkgdb_it_next(it, &pkg, PKG_LOAD_BASIC) == EPKG_OK)
+	if (pkgdb_it_next(it, &pkg, flags) == EPKG_OK)
 		result = PyCapsule_New(pkg, "pkglib.pkg", NULL);
 	else {
 		pkgdb_it_reset(it);
