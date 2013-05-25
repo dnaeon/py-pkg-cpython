@@ -5,7 +5,7 @@ class PkgDb(object):
                 self._db = pkglib.db_open(remotedb)
 
         def __del__(self):
-                pass
+                pkglib.db_close(self._db)
 
         def close(self):
                 pkglib.db_close(self._db)

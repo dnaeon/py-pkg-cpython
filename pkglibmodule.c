@@ -130,8 +130,9 @@ pkglib_db_close(PyObject *self, PyObject *args)
 
 	pkgdb_close(db);
 
+	Py_DECREF(db_capsule);
+	
 	Py_INCREF(Py_None);
-
 	return (Py_None);
 }
 
