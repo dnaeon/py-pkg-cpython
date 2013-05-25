@@ -233,8 +233,18 @@ class PkgDepIter(object):
         def __init__(self, pkg):
                 self._pkg = pkg
 
+        def __del__(self):
+                pass
+
         def __iter__(self):
                 return self
+
+        def __contains__(self, name):
+                for d in self:
+                        if d.name() == name or d.origin() == name:
+                                return True
+
+                return False
 
         def next(self):
                 result = pkglib.pkg_dep_iter(self._pkg)
@@ -247,6 +257,9 @@ class PkgDepIter(object):
 class PkgDep(object):
         def __init__(self, dep):
                 self._dep = dep;
+
+        def __del__(self):
+                pass
 
         def name(self):
                 return pkglib.pkg_dep_name(self._dep)
