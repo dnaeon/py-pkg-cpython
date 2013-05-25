@@ -36,6 +36,7 @@ static PyObject *pkglib_db_open(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_close(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_info(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_iter(PyObject *self, PyObject *args);
+static PyObject *pkglib_db_query_iter_free(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_install(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_delete(PyObject *self, PyObject *args);
 static PyObject *pkglib_db_query_autoremove(PyObject *self, PyObject *args);
@@ -69,6 +70,7 @@ PkgLibMethods[] = {
 	{ "db_close",             pkglib_db_close,              METH_VARARGS, NULL },
 	{ "db_query_info",        pkglib_db_query_info,         METH_VARARGS, NULL },
 	{ "db_query_iter",        pkglib_db_query_iter,         METH_VARARGS, NULL },
+	{ "db_query_iter_free",   pkglib_db_query_iter_free,    METH_VARARGS, NULL },
 	{ "db_query_install",     pkglib_db_query_install,      METH_VARARGS, NULL },
 	{ "db_query_delete",      pkglib_db_query_delete,       METH_VARARGS, NULL },
 	{ "db_query_autoremove",  pkglib_db_query_autoremove,   METH_VARARGS, NULL },
@@ -334,6 +336,25 @@ pkglib_db_query_iter(PyObject *self, PyObject *args)
 	}
 
 	return (result);
+}
+
+static PyObject *
+pkglib_db_query_iter_free(PyObject *self, PyObject *args)
+{
+	struct pkgdb_it *it = NULL;
+	PyObject *it_capsule = NULL;
+
+	if (PyArg_ParseTuple(args, "O", &it_capsule) == 0)
+		return (NULL);
+
+	it = (struct pkgdb_it *)PyCapsule_GetPointer(it_capsule, "pkglib.it");
+
+	pkgdb_it_free(it);
+
+	Py_DECREF(it_capsule);
+
+	Py_INCREF(Py_None);
+	return (Py_None);
 }
 
 static PyObject *

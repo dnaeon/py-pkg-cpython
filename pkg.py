@@ -34,7 +34,7 @@ class PkgIter(object):
                 self._it = pkglib.db_query_info(db, pkgname, match_regex)
 
         def __del__(self):
-                pass
+                pkglib.db_query_iter_free(self._it)
 
         def __contains__(self, name):
                 for p in self:
@@ -61,6 +61,9 @@ class PkgIter(object):
                         raise StopIteration
                 else:
                         return Pkg(result)
+
+        def free(self):
+                pkglib.db_query_iter_free(self._it)
 
 class PkgJobs(object):
         def __init__(self, jobs):
