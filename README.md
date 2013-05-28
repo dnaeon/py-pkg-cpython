@@ -1,8 +1,6 @@
-## Python bindings to libpkg(3)
+Project has been abandoned, if you are looking for Python wrappers for libpkg, please check the project listed below:
 
-Project goal is to provide Python bindings to FreeBSD's libpkg(3) library, aka pkgng.
+* https://github.com/dnaeon/py-pkg
 
-## TODO
 
-* Get the documentation in shape :)
 
